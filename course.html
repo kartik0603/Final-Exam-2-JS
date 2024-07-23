@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Details</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="navbar-container"></div>
+  <div class="container mt-5">
+    <h2>Course Details</h2>
+    <div id="course-details"></div>
+    <button id="purchase-btn" class="btn btn-success mt-3">Purchase Course</button>
+  </div>
+  <script src="loadNavbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('id');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        alert('You must be logged in to purchase a course.');
+        window.location.href = 'login.html';
+      }
+
+      fetch(`http://localhost:3000/courses/${courseId}`)
+        .then(response => response.json())
+        .then(course => {
+          const courseDetails = document.getElementById('course-details');
+          courseDetails.innerHTML = `
+            <h3>${course.name}</h3>
+            <img src="${course.image}" class="img-fluid" alt="${course.name}">
+            <p>Duration: ${course.duration}</p>
+            <p>Price: $${course.price}</p>
+            <p>Seats available: ${course.seats}</p>
+            <h4>Topics</h4>
+            <ul>${course.topics.map(topic => `<li>${topic}</li>`).join('')}</ul>
+            <h4>Subtopics</h4>
+            <ul>${course.subtopics.map(subtopic => `<li>${subtopic}</li>`).join('')}</ul>
+          `;
+
+          document.getElementById('purchase-btn').addEventListener('click', function() {
+            if (course.seats > 0) {
+              course.seats -= 1;
+              fetch(`http://localhost:3000/courses/${courseId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(course)
+              })
+              .then(response => response.json())
+              .then(updatedCourse => {
+                alert('Course purchased successfully!');
+                // Add course to user's purchased courses
+                fetch(`http://localhost:3000/users/${user.id}`)
+                  .then(response => response.json())
+                  .then(userData => {
+                    userData.courses = userData.courses || [];
+                    userData.courses.push(updatedCourse.id);
+                    fetch(`http://localhost:3000/users/${user.id}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify(userData)
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                      localStorage.setItem('user', JSON.stringify(userData));
+                      window.location.href = 'dashboard.html';
+                    });
+                  });
+              });
+            } else {
+              alert('No seats available for this course.');
+            }
+          });
+        });
+    });
+  </script>
+</body>
+</html>

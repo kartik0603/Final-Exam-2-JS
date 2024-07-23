@@ -3,11 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Exam 2</title>
+    <title>Home</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+}
+
+.course-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.course-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    width: 200px;
+}
+
+.course-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px 8px 0 0;
+}
+
+.course-card h3 {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.course-card p {
+    margin: 5px 0;
+}
+
+.course-card button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.course-card button:hover {
+    background-color: #218838;
+}
+
+    </style>
 </head>
 <body>
-    
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="login.html" >Login</a></li>
+            <a href="cart.html">Cart</a>
+            <button id="logoutBtn">Logout</button>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Available Courses</h2>
+        <input type="text" id="searchInput" placeholder="Search courses...">
+        <div id="coursesList"></div>
+    </div>
+
+    <script src="index.js"></script>
+    <script src="initializeData.js"></script>
+    <script src="displayCourses.js"></script>
+    <script src="checkAuth.js" defer></script>
+
+
 </body>
-<script src="script.js"></script>
 </html>
