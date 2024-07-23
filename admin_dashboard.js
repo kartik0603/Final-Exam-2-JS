@@ -1,31 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const addCourseForm = document.getElementById('add-course-form');
     const courseList = document.getElementById('course-list');
-
     const courses = JSON.parse(localStorage.getItem('courses')) || [];
 
     // Display existing courses
     displayCourses();
-
-    // Add new course
-    addCourseForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const newCourse = {
-            id: Date.now(),
-            name: event.target.name.value,
-            image: event.target.image.value,
-            duration: event.target.duration.value,
-            price: parseFloat(event.target.price.value),
-            seats: parseInt(event.target.seats.value),
-            topics: event.target.topics.value.split(',').map(topic => topic.trim()),
-            subtopics: event.target.subtopics.value.split(',').map(subtopic => subtopic.trim())
-        };
-
-        courses.push(newCourse);
-        localStorage.setItem('courses', JSON.stringify(courses));
-        displayCourses();
-        addCourseForm.reset();
-    });
 
     // Display courses
     function displayCourses() {
@@ -39,13 +17,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>${course.name}</h3>
                 <p>Duration: ${course.duration}</p>
                 <p>Price: ₹${course.price}</p>
-                <p>Seats: ${course.seats}</p>
-                <button onclick="removeCourse(${course.id})">Remove</button>
+                <p>Seats Available: ${course.seats}</p>
+                <button onclick="addSeats(${course.id})">Add Seat</button>
+                <button onclick="removeSeats(${course.id})">Remove Seat</button>
+                <button onclick="removeCourse(${course.id})">Remove Course</button>
             `;
 
             courseList.appendChild(courseCard);
         });
     }
+
+    // Add seats
+    window.addSeats = function(courseId) {
+        const course = courses.find(course => course.id === courseId);
+        if (course) {
+            course.seats += 1;
+            localStorage.setItem('courses', JSON.stringify(courses));
+            displayCourses();
+        }
+    };
+
+    // Remove seats
+    window.removeSeats = function(courseId) {
+        const course = courses.find(course => course.id === courseId);
+        if (course && course.seats > 0) {
+            course.seats -= 1;
+            localStorage.setItem('courses', JSON.stringify(courses));
+            displayCourses();
+        }
+    };
 
     // Remove course
     window.removeCourse = function(courseId) {

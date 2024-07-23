@@ -1,12 +1,14 @@
+<!-- Admin Page HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Admin Page</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -14,12 +16,100 @@
             <li><a href="login.html" id="logoutBtn">Logout</a></li>
         </ul>
     </nav>
+    <h1>Admin Page</h1>
+    
+    <!-- Add Course Form -->
+    <form id="add-course-form">
+        <input type="text" name="name" placeholder="Course Name" required>
+        <input type="text" name="image" placeholder="Course Image URL" required>
+        <input type="text" name="duration" placeholder="Duration" required>
+        <input type="number" name="price" placeholder="Price" step="0.01" required>
+        <input type="number" name="seats" placeholder="Number of Seats" required>
+        <input type="text" name="topics" placeholder="Topics (comma separated)" required>
+        <input type="text" name="subtopics" placeholder="Subtopics (comma separated)" required>
+        <button type="submit">Add Course</button>
+    </form>
 
-    <div class="container">
-        <h2>My Courses</h2>
-        <div id="userCoursesList"></div>
-    </div>
+    <!-- Course List -->
+    <div id="course-list"></div>
 
-    <script src="dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addCourseForm = document.getElementById('add-course-form');
+            const courseList = document.getElementById('course-list');
+
+            const courses = JSON.parse(localStorage.getItem('courses')) || [];
+
+            // Display existing courses
+            displayCourses();
+
+            // Add new course
+            addCourseForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const newCourse = {
+                    id: Date.now(),
+                    name: event.target.name.value,
+                    image: event.target.image.value,
+                    duration: event.target.duration.value,
+                    price: parseFloat(event.target.price.value),
+                    seats: parseInt(event.target.seats.value),
+                    topics: event.target.topics.value.split(',').map(topic => topic.trim()),
+                    subtopics: event.target.subtopics.value.split(',').map(subtopic => subtopic.trim())
+                };
+
+                courses.push(newCourse);
+                localStorage.setItem('courses', JSON.stringify(courses));
+                displayCourses();
+                addCourseForm.reset();
+            });
+
+            // Display courses
+            function displayCourses() {
+                courseList.innerHTML = '';
+                courses.forEach(course => {
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+
+                    courseCard.innerHTML = `
+                        <img src="${course.image}" alt="${course.name}">
+                        <h3>${course.name}</h3>
+                        <p>Duration: ${course.duration}</p>
+                        <p>Price: ₹${course.price}</p>
+                        <p>Seats: ${course.seats}</p>
+                        <button onclick="removeCourse(${course.id})">Remove</button>
+                        <button onclick="updateSeats(${course.id}, 1)">Increase Seats</button>
+                        <button onclick="updateSeats(${course.id}, -1)">Decrease Seats</button>
+                    `;
+
+                    courseList.appendChild(courseCard);
+                });
+            }
+
+            // Remove course
+            window.removeCourse = function(courseId) {
+                const index = courses.findIndex(course => course.id === courseId);
+                if (index > -1) {
+                    courses.splice(index, 1);
+                    localStorage.setItem('courses', JSON.stringify(courses));
+                    displayCourses();
+                }
+            };
+
+            // Update seats
+            window.updateSeats = function(courseId, delta) {
+                const course = courses.find(course => course.id === courseId);
+                if (course) {
+                    course.seats += delta;
+                    if (course.seats < 0) course.seats = 0; // Prevent negative seats
+                    localStorage.setItem('courses', JSON.stringify(courses));
+                    displayCourses();
+                }
+            };
+        });
+    </script>
 </body>
 </html>
+
+
+
+

@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect based on role
             if (user.role === 'admin') {
-                window.location.href = 'admin.html';
+                window.location.href = 'admin_dashboard.html';
             } else {
                 window.location.href = 'index.html';
             }

@@ -5,63 +5,58 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    function displayCourses(courses) {
-        const coursesList = document.getElementById('coursesList');
-        coursesList.innerHTML = '';
-        courses.forEach(course => {
-            const courseItem = document.createElement('div');
-            courseItem.className = 'course-item';
-            courseItem.innerHTML = `
+    const courseList = document.getElementById('course-list');
+    const searchInput = document.getElementById('searchInput');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    let courses = JSON.parse(localStorage.getItem('courses')) || [];
+
+    // Display courses
+    function displayCourses(filteredCourses = courses) {
+        courseList.innerHTML = '';
+        filteredCourses.forEach(course => {
+            const courseCard = document.createElement('div');
+            courseCard.className = 'course-card';
+
+            courseCard.innerHTML = `
                 <img src="${course.image}" alt="${course.name}">
                 <h3>${course.name}</h3>
-                <p>${course.duration}</p>
-                <p>${course.price} INR</p>
-                <button onclick="purchaseCourse(${course.id})">Purchase</button>
+                <p>Duration: ${course.duration}</p>
+                <p>Price: ₹${course.price}</p>
+                <p>Seats: ${course.seats}</p>
+                <button onclick="purchaseCourse(${course.id})" ${course.seats <= 0 ? 'disabled' : ''}>Purchase</button>
             `;
-            coursesList.appendChild(courseItem);
+
+            courseList.appendChild(courseCard);
         });
     }
 
+    // Search courses
     function searchCourses(query) {
-        const courses = JSON.parse(localStorage.getItem('courses')) || [];
         const filteredCourses = courses.filter(course => course.name.toLowerCase().includes(query.toLowerCase()));
         displayCourses(filteredCourses);
     }
 
-    document.getElementById('searchInput').addEventListener('input', function(event) {
+    // Event listeners
+    searchInput.addEventListener('input', function(event) {
         searchCourses(event.target.value);
     });
 
-    displayCourses(JSON.parse(localStorage.getItem('courses')) || []);
-
-    document.getElementById('logoutBtn').addEventListener('click', function() {
+    logoutBtn.addEventListener('click', function() {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     });
-});
 
-function purchaseCourse(courseId) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        window.location.href = 'login.html';
-        return;
-    }
+    // Initial display
+    displayCourses();
 
-    const courses = JSON.parse(localStorage.getItem('courses')) || [];
-    const course = courses.find(course => course.id === courseId);
-    if (course && course.seats > 0) {
-        course.seats -= 1;
-        localStorage.setItem('courses', JSON.stringify(courses));
-
-        const userCourses = JSON.parse(localStorage.getItem('userCourses')) || {};
-        if (!userCourses[currentUser.id]) {
-            userCourses[currentUser.id] = [];
+    // Purchase course
+    window.purchaseCourse = function(courseId) {
+        const course = courses.find(course => course.id === courseId);
+        if (course && course.seats > 0) {
+            course.seats -= 1;
+            localStorage.setItem('courses', JSON.stringify(courses));
+            displayCourses(); // Update the display after purchase
         }
-        userCourses[currentUser.id].push(course);
-        localStorage.setItem('userCourses', JSON.stringify(userCourses));
-
-        alert('Course purchased successfully!');
-    } else {
-        alert('Course is full!');
-    }
-}
+    };
+});
